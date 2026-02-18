@@ -1,9 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
-import re
-from bs4 import BeautifulSoup
 import requests
 import httpx
+
+
+OEMBED_URL = 'https://www.tiktok.com/oembed'
+
+
 @dataclass
 class VideoInfoV2:
     url: str
@@ -16,32 +19,38 @@ class VideoInfoV2:
 
     @classmethod
     def get_info(cls, url: str) -> VideoInfoV2:
-        obj = BeautifulSoup(requests.get(
-            url,
-            headers={
-                'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36 UOS'
-            }
-        ).text)
-        caption = obj.title.text
-        cover = re.findall(r'cover\":\"(http[\w:/\-\.\?\=&%]+)"', obj.__str__().replace('\\u002F','/'))[0]
-        username = re.findall(r'author\":"([\w]+)"', obj.__str__())[0]
-        like = obj.find_all('strong', attrs={'data-e2e':'like-count'})[0].text
-        comment = obj.find_all('strong', attrs={'data-e2e':'comment-count'})[0].text
-        aweme_id = re.findall(r'aweme/detail/([0-9]+)', obj.__str__())[0]
+        """Fetch video info using TikTok's official oEmbed API.
+
+        The oEmbed endpoint is publicly accessible and not protected by
+        TikTok's bot-challenge (pumbaa-rule), unlike the regular page HTML.
+        """
+        res = requests.get(OEMBED_URL, params={'url': url})
+        res.raise_for_status()
+        data = res.json()
+
+        caption = data.get('title', '')
+        username = data.get('author_unique_id', data.get('author_name', ''))
+        cover = data.get('thumbnail_url', '')
+        aweme_id = data.get('embed_product_id', '')
+        # oEmbed does not expose like/comment counts
+        like = 'N/A'
+        comment = 'N/A'
+
         return cls(url, caption, comment, like, cover, aweme_id, username)
 
     @classmethod
-    async def get_info_async(cls, url: str):
-        obj = BeautifulSoup((await httpx.AsyncClient().get(
-            url,
-            headers={
-                'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36 UOS'
-            }
-        )).text)
-        caption = obj.title.text
-        cover = re.findall(r'cover\":\"(http[\w:/\-\.\?\=&%]+)"', obj.__str__().replace('\\u002F','/'))[0]
-        username = re.findall(r'author\":"([\w]+)"', obj.__str__())[0]
-        like = obj.find_all('strong', attrs={'data-e2e':'like-count'})[0].text
-        comment = obj.find_all('strong', attrs={'data-e2e':'comment-count'})[0].text
-        aweme_id = re.findall(r'aweme/detail/([0-9]+)', obj.__str__())[0]
+    async def get_info_async(cls, url: str) -> VideoInfoV2:
+        """Async version of get_info using TikTok's official oEmbed API."""
+        async with httpx.AsyncClient() as client:
+            res = await client.get(OEMBED_URL, params={'url': url})
+            res.raise_for_status()
+            data = res.json()
+
+        caption = data.get('title', '')
+        username = data.get('author_unique_id', data.get('author_name', ''))
+        cover = data.get('thumbnail_url', '')
+        aweme_id = data.get('embed_product_id', '')
+        like = 'N/A'
+        comment = 'N/A'
+
         return cls(url, caption, comment, like, cover, aweme_id, username)
