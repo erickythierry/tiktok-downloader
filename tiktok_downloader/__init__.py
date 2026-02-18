@@ -32,6 +32,6 @@ services = {
     'mdown': mdown,
     'ttdownloader': ttdownloader,
     'tikdown': tikdown,
-    'tiktok': VideoInfo.service,
+    'tiktok': tikwm,
     'tikwm': tikwm
 }
