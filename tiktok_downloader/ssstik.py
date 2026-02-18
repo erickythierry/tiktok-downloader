@@ -12,7 +12,7 @@ class SsstikIO(Session):
             'https://ssstik.io/abc?url=dl', data={
                 'id': url,
                 'locale': 'en',
-                'tt': re.findall(r'tt:\'([\w\d]+)\'', ses.text)[0],
+                'tt': (re.findall(r's_tt\s*=\s*[\"\']([\w\d]+)[\"\']', ses.text) or re.findall(r'\"tt\":\"([\w\d]+)\"', ses.text))[0],
             },
             headers={
                 'hx-current-url': 'https://ssstik.io/id',
@@ -50,7 +50,7 @@ class SsstikAIO(AsyncClient):
             'https://ssstik.io/abc?url=dl', data={
                 'id': url,
                 'locale': 'id',
-                'tt': re.findall(r'tt:\'([\w\d]+)\'', ses.text)[0],
+                'tt': (re.findall(r's_tt\s*=\s*[\"\']([\w\d]+)[\"\']', ses.text) or re.findall(r'\"tt\":\"([\w\d]+)\"', ses.text))[0],
             },
             headers={
                 'hx-current-url': 'https://ssstik.io/id',

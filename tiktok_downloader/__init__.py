@@ -25,22 +25,13 @@ __all__ = [
     'tikwm',
     'TikWM'
 ]
-def robust(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception:
-            return tikwm(*args, **kwargs)
-    return wrapper
-
-
 services = {
-    'snaptik': robust(snaptik),
-    'ssstik': robust(ssstik),
-    'tikmate': robust(tikmate),
-    'mdown': robust(mdown),
-    'ttdownloader': robust(ttdownloader),
-    'tikdown': robust(tikdown),
-    'tiktok': robust(tikwm),
+    'snaptik': snaptik,
+    'ssstik': ssstik,
+    'tikmate': tikmate,
+    'mdown': mdown,
+    'ttdownloader': ttdownloader,
+    'tikdown': tikdown,
+    'tiktok': tikwm,
     'tikwm': tikwm
 }

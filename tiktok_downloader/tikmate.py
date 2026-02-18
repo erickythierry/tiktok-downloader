@@ -15,8 +15,10 @@ import aiohttp
 def decodeJWT(resp: str) -> Generator[dict[str, str], None, None]:
     urls = re.findall('https?://snap[\w./?=.&\-]+', resp)
     for i in urls:
-        token: str = re.search(r'token=(.*?)&', i).group(0)
-        yield {'filename':'tiktok.'+['mp4','mp3'][b'.mp3' in b64decode(token.split('.')[1] + '==========')], 'url': i}
+        token_match = re.search(r'token=(.*?)&', i)
+        if token_match:
+            token: str = token_match.group(1)
+            yield {'filename':'tiktok.'+['mp4','mp3'][b'.mp3' in b64decode(token.split('.')[1] + '==========')], 'url': i}
 class Tikmate(requests.Session):
     BASE_URL = 'https://tikmate.online/'
 
@@ -54,7 +56,9 @@ class Tikmate(requests.Session):
         )
         if "'error_api_get'" in media.text:
             raise InvalidURL()
-        tt = re.findall(r'\(\".*?,.*?,.*?,.*?,.*?.*?\)', media.text)
+        tt = re.findall(r'\(\"[\s\S]*?\",\d+,\d+,\"[\s\S]*?\"\.split\(\"\|\"\),\d+,\{\}\)', media.text)
+        if not tt:
+             tt = re.findall(r'\(\".*?\",\d+,\d+,\".*?\",\d+,.*?\)', media.text)
         decode = decodeJWT(decoder(*literal_eval(tt[0])))
         return [
             Download(
@@ -101,7 +105,9 @@ class TikmateAsync(AsyncClient):
                 text = await media.text()
                 if "'error_api_get'" in text:
                     raise InvalidURL()
-                tt = re.findall(r'\(\".*?,.*?,.*?,.*?,.*?.*?\)', text)
+                tt = re.findall(r'\(\"[\s\S]*?\",\d+,\d+,\"[\s\S]*?\"\.split\(\"\|\"\),\d+,\{\}\)', text)
+                if not tt:
+                    tt = re.findall(r'\(\".*?\",\d+,\d+,\".*?\",\d+,.*?\)', text)
                 decode = decodeJWT(decoder(*literal_eval(tt[0])))
                 return [
                     DownloadAsync(
@@ -117,4 +123,4 @@ def tikmate(url: str):
 
 
 async def tikmate_async(url: str):
-    return await tikmateAsync().get_media(url)
+    return await TikmateAsync().get_media(url)
