@@ -2,23 +2,22 @@ from __future__ import annotations
 import asyncio
 import httpx
 from PIL import Image
-from moviepy.video.VideoClip import tempfile
+import tempfile
 import numpy as np
 from io import BytesIO
 from typing import Callable, List, Optional, Union
-from moviepy.audio.AudioClip import concatenate_audioclips
+from moviepy import concatenate_audioclips
 from requests import Session
 from warnings import simplefilter
 from io import BufferedWriter
 from enum import Enum
-from moviepy.editor import (
+from moviepy import (
     CompositeAudioClip,
     ImageClip,
     AudioFileClip,
     CompositeVideoClip,
     VideoClip,
     concatenate_videoclips,
-    transfx,
 )
 import re
 from tiktok_downloader.Except import NoImageToSlideshow
