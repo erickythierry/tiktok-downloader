@@ -39,7 +39,7 @@ class TTDownloader(Session):
         )
         return [
             Download(nowm, self, 'video'),
-            Download(wm, self, 'video', True),
+            Download(wm, self, 'video', watermark=True),
             Download(audio, self, 'music')
         ]
 
@@ -80,7 +80,7 @@ class TTDownloaderAsync(AsyncClient):
         )
         return [
             DownloadAsync(nowm, self, 'video'),
-            DownloadAsync(wm, self, 'video', True),
+            DownloadAsync(wm, self, 'video', watermark=True),
             DownloadAsync(audio, self, 'music')
         ]
 

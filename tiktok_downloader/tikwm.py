@@ -25,7 +25,7 @@ class TikWM(Session):
                     self.BASE_URL + res['data']['wmplay'],
                     self,
                     'video',
-                    True
+                    watermark=True
                 ),
                 Download(
                     self.BASE_URL + res['data']['music'],
@@ -58,7 +58,7 @@ class TikWMAsync(AsyncClient):
                     self.BASE_URL + res['data']['wmplay'],
                     self,
                     'video',
-                    True
+                    watermark=True
                 ),
                 DownloadAsync(
                     self.BASE_URL + res['data']['music'],
